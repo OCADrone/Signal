@@ -9,10 +9,12 @@ using namespace KNM;
 
 void 		usage()
 {
-	cerr << "usage: regserver [-p|--port <port>] [-a|--address <address>]" << endl;
-	cerr << "default: listen on " << SERVER_DEFAULT_ADDRESS ":" << SERVER_DEFAULT_PORT << endl;
+	cerr << "usage: sigserver option..." << endl;
+	cerr << "options: " << endl;
+	cerr << "-c | --config  : Configuration file path" << endl;
+	cerr << "-a | --address : Address to listen on"    << endl;
+	cerr << "-p | --port    : Port to bind on"         << endl;
 	exit(1);
-
 }
 
 int 				main(int ac, char **av)
