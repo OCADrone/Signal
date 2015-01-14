@@ -13,12 +13,100 @@ void 			usage()
 	exit(1);
 }
 
+void 			cmd_help()
+{
+	cerr << "commands: subscribe, send, fetch" << endl;
+}
+
+void 			cmd_subscribe(const string &args, AISignal::client *sigclient)
+{
+	string 	*channel;
+
+	channel = KUtils::cut(args, ' ', 1);
+	if (channel->size() > 0)
+	{
+		cout << "subscribing to channel " << *channel << endl;
+		sigclient->subscribe(*channel);
+	}
+	else
+		cout << "syntax: subscribe <channel-path>" << endl;
+}
+
+void 			cmd_send(const string &args, AISignal::client *sigclient)
+{
+	string 	*channel;
+	string 	*data;
+
+	channel = KUtils::cut(args, ' ', 1);
+	data    = KUtils::cut(args, ' ', 2);
+	if (channel->size() > 0 && data->size() > 0)
+	{
+		cout << "send '" << *data << "' on '" << *channel << "'" << endl;
+		sigclient->send(*channel, *data);
+	}
+	else
+		cout << "syntax: send <channel-path> <data>" << endl;
+
+}
+
+void 			cmd_fetch(const string &args, AISignal::client *sigclient)
+{
+	string 						*channel;
+	string 						*mode;
+	AISignal::signal 	sigin;
+
+	channel = KUtils::cut(args, ' ', 1);
+	mode    = KUtils::cut(args, ' ', 2);
+
+	if (channel->size() > 0 && mode->size() > 0)
+	{
+		if (*mode == "FIFO" || *mode == "fifo")
+			sigin = sigclient->fetch(*channel, AISignal::mode::FIFO);
+		else if (*mode == "LIFO" || *mode == "lifo")
+			sigin = sigclient->fetch(*channel, AISignal::mode::LIFO);
+		else
+		{
+			cerr << "invalid mode: FIFO or LIFO expected" << endl;
+			return;
+		}
+		cout << sigin.data << endl;
+	}
+	else
+		cout << "syntax: fetch <channel-path> <FIFO|LIFO>" << endl;
+
+}
+
+void 			shell(AISignal::client *sigclient)
+{
+	string 	line;
+	string 	*command;
+
+	while (true)
+	{
+		cout << "signal-client: ";
+		std::getline(std::cin, line);
+		command = KUtils::cut(line, ' ', 0);
+
+		if (*command == "subscribe")
+			cmd_subscribe(line, sigclient);
+		else if (*command == "send")
+			cmd_send(line, sigclient);
+		else if (*command == "fetch")
+			cmd_fetch(line, sigclient);
+		else if (*command == "help")
+			cmd_help();
+		else if (*command == "exit" || *command == "quit")
+			return;
+		else
+		{
+			cerr << "unknow command '" << *command << "'" << endl;
+			cmd_help();
+		}
+	}
+}
+
 int 								main(int ac, char **av)
 {
-	string 						resp;
-	string 						cmd;
-	string 						path;
-	string 						data;
 	AISignal::client 	sigclient;
 
 	if (ac < 3)
@@ -30,46 +118,11 @@ int 								main(int ac, char **av)
 	try
 	{
 		sigclient.connect();
-
-		while (true)
-		{
-			resp.clear();
-
-			// get command
-			cout << "command (fetch|send): ";
-			cin >> cmd;
-
-			// === SEND ===
-			if (cmd == "send")
-			{
-				cout << "path: ";
-				cin >> path;
-
-				cout << "data: ";
-				cin >> data;
-
-				sigclient.send(path, data);
-			}
-
-			// === FETCH ===
-			else if (cmd == "fetch")
-			{
-				cout << "path: ";
-				cin >> path;
-
-				resp = sigclient.fetch(path);
-				cout << "response: " << resp << endl;
-			}
-		}
-
+		shell(&sigclient);
 	}
 	catch(const KError &error)
 	{
-		cerr << "ERROR: ";
 		error.dump();
 	}
-
-	if (resp.size() > 0)
-		cout << resp << endl;
 	return 0;
 }

@@ -22,6 +22,8 @@ int 				main(int ac, char **av)
 	server 		host;
 	KConfig 	config;
 	KFS 			shell;
+	int 			lid;
+	string 		cname;
 
 	if (config.is_flag(ac, av, 'h', "help"))
 		usage();
@@ -35,12 +37,13 @@ int 				main(int ac, char **av)
 		if (shell.is_file(SERVER_DEFAULT_CFGFILE))
 			config.include(SERVER_DEFAULT_CFGFILE);
 	}
+	
 
 	// Setup configuration rules
 	config.add_rule(new KConfig::option(".network.address", 'a', "address",        1, KConfig::MANDATORY, KConfig::PREFER_ARGS));
 	config.add_rule(new KConfig::option(".network.port",    'p', "port",           1, KConfig::MANDATORY, KConfig::PREFER_ARGS));
-	config.add_rule(new KConfig::option(".channels.size",   ' ', "channels-size",  1, KConfig::OPTIONNAL, KConfig::PREFER_ARGS, "1"));
-	config.add_rule(new KConfig::option(".channels.build",  ' ', "channels-build", 1, KConfig::OPTIONNAL, KConfig::PREFER_ARGS, "true"));
+	//config.add_rule(new KConfig::option(".channels.size",   ' ', "channels-size",  1, KConfig::OPTIONNAL, KConfig::PREFER_ARGS, "1"));
+	//config.add_rule(new KConfig::option(".channels.build",  ' ', "channels-build", 1, KConfig::OPTIONNAL, KConfig::PREFER_ARGS, "true"));
 
 	// Load configuration
 	try
@@ -58,6 +61,19 @@ int 				main(int ac, char **av)
 	host.set_address(config.find_s(".network.address"));
 	host.set_port(KUtils::to_int(config.find_s(".network.port")));
 
+	// Add channels
+	lid = 0;
+	cname = ".channels." + *KUtils::to_string(lid);
+	while (config.is_option(cname))
+	{
+		cout << "add channel: " << config.find_s(cname) << endl;
+		host.add_channel(config.find_s(cname));
+		lid++;
+		cname = ".channels." + *KUtils::to_string(lid);
+	}
+
+
+	// Start server
 	try
 	{
 		host.start();
