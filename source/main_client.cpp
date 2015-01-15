@@ -64,9 +64,11 @@ void 			cmd_fetch(const string &args, AISignal::client *sigclient)
 			sigin = sigclient->fetch(*channel, AISignal::mode::FIFO);
 		else if (*mode == "LIFO" || *mode == "lifo")
 			sigin = sigclient->fetch(*channel, AISignal::mode::LIFO);
+		else if (*mode == "SINGLE" || *mode == "single")
+			sigin = sigclient->fetch(*channel, AISignal::mode::SINGLE);
 		else
 		{
-			cerr << "invalid mode: FIFO or LIFO expected" << endl;
+			cerr << "invalid mode: FIFO, LIFO or SINGLE expected" << endl;
 			return;
 		}
 		cout << sigin.data << endl;

@@ -70,7 +70,7 @@ void 								server::start()
  */
 void 	server::add_channel(const string &_channel)
 {
-	sigdb->mkleaf(_channel);
+	sigdb->mkleaf(_channel, new AISignal::channel);
 }
 
 void 	server::init()

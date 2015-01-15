@@ -37,7 +37,7 @@ int 				main(int ac, char **av)
 		if (shell.is_file(SERVER_DEFAULT_CFGFILE))
 			config.include(SERVER_DEFAULT_CFGFILE);
 	}
-	
+
 
 	// Setup configuration rules
 	config.add_rule(new KConfig::option(".network.address", 'a', "address",        1, KConfig::MANDATORY, KConfig::PREFER_ARGS));
@@ -66,7 +66,6 @@ int 				main(int ac, char **av)
 	cname = ".channels." + *KUtils::to_string(lid);
 	while (config.is_option(cname))
 	{
-		cout << "add channel: " << config.find_s(cname) << endl;
 		host.add_channel(config.find_s(cname));
 		lid++;
 		cname = ".channels." + *KUtils::to_string(lid);
